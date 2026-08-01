@@ -96,6 +96,30 @@ h2{font-family:var(--f-disp);font-weight:800;font-size:clamp(32px,4.4vw,52px);li
 .card li{margin-bottom:9px}
 code{font-family:var(--f-mono);font-size:12px;background:#0A0906;border:1px solid #2E251D;border-radius:3px;padding:2px 6px;color:var(--lcd);word-break:break-all}
 
+.demo{padding:76px 0;border-bottom:1px solid var(--hair)}
+.demo-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:56px}
+.demo .lead{margin:0;color:#A89C8C;max-width:62ch}
+.ab{margin-top:26px;background:var(--panel);border:1px solid var(--hair);border-radius:6px;padding:22px}
+.ab button:focus-visible,.ab-wave:focus-visible{outline:2px solid var(--lcd);outline-offset:2px}
+.ab-switch{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#0A0906;border:1px solid #2E251D;border-radius:4px}
+.ab-switch button{position:relative;z-index:2;font-family:var(--f-disp);font-weight:700;font-size:15px;letter-spacing:.16em;text-transform:uppercase;padding:11px 8px;border:0;border-radius:3px;background:transparent;color:#7A6A58;cursor:pointer;transition:color .16s ease}
+.ab-switch button[aria-pressed="true"]{color:#1A0C05}
+.ab-thumb{position:absolute;z-index:1;top:4px;bottom:4px;left:4px;width:calc(50% - 6px);border-radius:3px;background:linear-gradient(180deg,#E4572E,#B33C1C);transition:transform .2s cubic-bezier(.4,0,.2,1)}
+.ab-thumb.is-b{transform:translateX(calc(100% + 4px))}
+.ab-wave{position:relative;margin-top:16px;height:104px;background:#0A0906;border:1px solid #2E251D;border-radius:4px;overflow:hidden;cursor:pointer;touch-action:none}
+.ab-wave canvas{display:block;width:100%;height:100%}
+.ab-row{display:flex;align-items:center;gap:16px;margin-top:16px}
+.ab-play{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid #453A2F;background:linear-gradient(180deg,var(--panel-hi),#120E0B);color:var(--bone);display:grid;place-items:center;cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.06) inset;transition:border-color .12s ease,color .12s ease}
+.ab-play:hover{border-color:var(--lcd);color:var(--lcd)}
+.ab-play svg{width:22px;height:22px;fill:currentColor}
+.ab-time{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.1em;color:var(--lcd)}
+.ab-vol{margin-left:auto;display:flex;align-items:center;gap:10px;color:#7A6A58}
+.ab-vol svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.ab-vol input{-webkit-appearance:none;appearance:none;width:104px;height:3px;background:#2E251D;border-radius:2px;outline:0;cursor:pointer}
+.ab-vol input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;background:var(--lcd);border:0}
+.ab-vol input::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--lcd);border:0}
+.ab-hint{font-family:var(--f-mono);font-size:11.5px;line-height:1.8;letter-spacing:.04em;color:#8C7B66;margin:16px 0 0}
+
 footer{padding:56px 0 64px}
 .foot-grid{display:flex;flex-wrap:wrap;justify-content:space-between;gap:28px;align-items:flex-end}
 .plate{display:inline-flex;align-items:stretch;border:2px solid var(--bone);border-radius:5px;overflow:hidden;background:var(--bone)}
@@ -105,7 +129,8 @@ footer{padding:56px 0 64px}
 .legal a{color:#8C7B66}
 
 @media(max-width:900px){
-  .hero-grid,.pitch-grid{grid-template-columns:1fr;gap:36px}
+  .hero-grid,.pitch-grid,.demo-grid{grid-template-columns:1fr;gap:36px}
+  .ab-wave{height:84px}
   .hero{padding:44px 0 56px}
   .ad{grid-template-columns:1fr;gap:12px}
   .manual-head{grid-template-columns:1fr;gap:20px}
@@ -161,6 +186,51 @@ footer{padding:56px 0 64px}
         <li><span>Latency</span><span>0 samples</span></li>
         <li><span>Price</span><span>€0.00</span></li>
       </ul>
+    </div>
+  </div>
+</section>
+
+<section class="demo">
+  <div class="wrap demo-grid">
+    <div>
+      <p class="eyebrow">Listen</p>
+      <h2>Before and after</h2>
+    </div>
+    <div>
+      <p class="lead">The same loop twice — once straight out of the DAW, once after it has been through the car. Switch while it plays: both sides stay locked to the same position, so the only thing that changes is the speaker.</p>
+
+      <div class="ab" id="ab">
+        <div class="ab-switch">
+          <span class="ab-thumb" id="ab-thumb" aria-hidden="true"></span>
+          <button type="button" id="ab-a-btn" aria-pressed="true">Before</button>
+          <button type="button" id="ab-b-btn" aria-pressed="false">After</button>
+        </div>
+
+        <div class="ab-wave" id="ab-wave" role="slider" tabindex="0" aria-label="Seek position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0:00">
+          <canvas id="ab-canvas"></canvas>
+        </div>
+
+        <div class="ab-row">
+          <button type="button" class="ab-play" id="ab-play" aria-label="Play">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path id="ab-icon" d="M8 5.5v13l11-6.5z"/></svg>
+          </button>
+          <div class="ab-time"><span id="ab-cur">0:00</span> / <span id="ab-dur">0:00</span></div>
+          <div class="ab-vol">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.2L12 5.4v13.2L7.2 14.5H4z"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6"/></svg>
+            <input type="range" id="ab-vol" min="0" max="1" step="0.01" value="0.85" aria-label="Volume">
+          </div>
+        </div>
+
+        <div class="display" style="margin:18px 0 0">
+          <div class="display-row"><span><span class="led"></span><span id="ab-state">Before — dry signal</span></span><span>Golf 2</span></div>
+          <div class="display-row"><span>Gas 60% · Mileage 70% · Mix 100%</span><span>Crackle off</span></div>
+        </div>
+
+        <p class="ab-hint" id="ab-hint" hidden></p>
+      </div>
+
+      <audio id="ab-audio-a" src="audio/before.wav" preload="auto"></audio>
+      <audio id="ab-audio-b" src="audio/after.wav" preload="auto"></audio>
     </div>
   </div>
 </section>
@@ -318,6 +388,247 @@ footer{padding:56px 0 64px}
     </p>
   </div>
 </footer>
+
+<script>
+(function(){
+  var root = document.getElementById('ab');
+  if (!root) return;
+
+  var els   = [document.getElementById('ab-audio-a'), document.getElementById('ab-audio-b')];
+  var btns  = [document.getElementById('ab-a-btn'), document.getElementById('ab-b-btn')];
+  var peaks = [null, null];
+  var labels = ['Before — dry signal', 'After — through the car'];
+
+  var thumb = document.getElementById('ab-thumb'),
+      playBtn = document.getElementById('ab-play'),
+      icon = document.getElementById('ab-icon'),
+      curEl = document.getElementById('ab-cur'),
+      durEl = document.getElementById('ab-dur'),
+      volIn = document.getElementById('ab-vol'),
+      wave = document.getElementById('ab-wave'),
+      cv = document.getElementById('ab-canvas'),
+      ctx = cv.getContext('2d'),
+      stateEl = document.getElementById('ab-state'),
+      hint = document.getElementById('ab-hint');
+
+  var PLAY = 'M8 5.5v13l11-6.5z', PAUSE = 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z';
+  var active = 0, vol = parseFloat(volIn.value), raf = 0, broken = false;
+
+  function fmt(t){
+    if (!isFinite(t) || t < 0) t = 0;
+    var m = Math.floor(t / 60), s = Math.floor(t % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function duration(){
+    var d = els[active].duration;
+    return (isFinite(d) && d > 0) ? d : 0;
+  }
+
+  /* ---- waveform ---------------------------------------------------- */
+
+  function computePeaks(buf, n){
+    var ch = buf.getChannelData(0), out = new Float32Array(n), step = ch.length / n;
+    for (var i = 0; i < n; i++){
+      var s = Math.floor(i * step), e = Math.min(ch.length, Math.floor((i + 1) * step)), m = 0;
+      for (var j = s; j < e; j += 2){ var v = ch[j] < 0 ? -ch[j] : ch[j]; if (v > m) m = v; }
+      out[i] = m;
+    }
+    return out;
+  }
+
+  function loadPeaks(){
+    var OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OAC || !window.fetch) return;
+    var oac = new OAC(1, 1, 44100);
+    els.forEach(function(el, i){
+      fetch(el.getAttribute('src'))
+        .then(function(r){ if (!r.ok) throw 0; return r.arrayBuffer(); })
+        .then(function(ab){ return oac.decodeAudioData(ab); })
+        .then(function(buf){ peaks[i] = computePeaks(buf, 900); draw(); })
+        .catch(function(){ /* waveform stays flat, player still works */ });
+    });
+  }
+
+  function sizeCanvas(){
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = Math.round(cv.clientWidth * dpr);
+    cv.height = Math.round(cv.clientHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function bucket(arr, i, n){
+    if (!arr) return -1;
+    var s = Math.floor(i / n * arr.length),
+        e = Math.max(s + 1, Math.floor((i + 1) / n * arr.length)), m = 0;
+    for (var j = s; j < e && j < arr.length; j++) if (arr[j] > m) m = arr[j];
+    return m;
+  }
+
+  function drawSet(arr, n, W, H, ghost, progress){
+    var bw = W / n, mid = H / 2;
+    for (var i = 0; i < n; i++){
+      var p = bucket(arr, i, n),
+          h = p < 0 ? 3 : Math.max(2, p * H * 0.86),
+          x = i * bw;
+      if (ghost) ctx.fillStyle = '#2E251D';
+      else ctx.fillStyle = (x + bw / 2) / W <= progress ? '#E4572E' : '#6B5C4A';
+      ctx.fillRect(x, mid - h / 2, Math.max(1, bw - 1), h);
+    }
+  }
+
+  function draw(){
+    var W = cv.clientWidth, H = cv.clientHeight;
+    if (!W || !H) return;
+    ctx.clearRect(0, 0, W, H);
+    var d = duration(), progress = d ? els[active].currentTime / d : 0;
+    var n = Math.max(40, Math.floor(W / 3));
+    drawSet(peaks[1 - active], n, W, H, true, 0);
+    drawSet(peaks[active], n, W, H, false, progress);
+  }
+
+  /* ---- transport --------------------------------------------------- */
+
+  function applyVolume(){
+    els.forEach(function(el, i){ el.volume = i === active ? vol : 0; });
+  }
+
+  function syncOther(){
+    var other = els[1 - active], t = els[active].currentTime;
+    var od = isFinite(other.duration) ? other.duration : 0;
+    var target = od ? Math.min(t, od - 0.02) : t;
+    if (Math.abs(other.currentTime - target) > 0.05){
+      try { other.currentTime = target; } catch (e) {}
+    }
+  }
+
+  function update(){
+    var d = duration();
+    curEl.textContent = fmt(els[active].currentTime);
+    durEl.textContent = fmt(d);
+    var pct = d ? Math.round(els[active].currentTime / d * 100) : 0;
+    wave.setAttribute('aria-valuenow', pct);
+    wave.setAttribute('aria-valuetext', fmt(els[active].currentTime));
+    draw();
+  }
+
+  function tick(){
+    syncOther();
+    update();
+    raf = requestAnimationFrame(tick);
+  }
+
+  function setPlaying(on){
+    icon.setAttribute('d', on ? PAUSE : PLAY);
+    playBtn.setAttribute('aria-label', on ? 'Pause' : 'Play');
+    cancelAnimationFrame(raf);
+    if (on) raf = requestAnimationFrame(tick); else update();
+  }
+
+  function start(){
+    if (broken) return;
+    syncOther();
+    applyVolume();
+    els.forEach(function(el){
+      var p = el.play();
+      if (p && p.catch) p.catch(function(){});
+    });
+  }
+
+  function stop(){ els.forEach(function(el){ el.pause(); }); }
+
+  playBtn.addEventListener('click', function(){
+    if (els[active].paused) start(); else stop();
+  });
+
+  els[0].addEventListener('play', function(){ setPlaying(true); });
+  els[0].addEventListener('pause', function(){ if (els[active].paused) setPlaying(false); });
+  els[1].addEventListener('play', function(){ setPlaying(true); });
+  els[1].addEventListener('pause', function(){ if (els[active].paused) setPlaying(false); });
+
+  els.forEach(function(el){
+    el.addEventListener('loadedmetadata', update);
+    el.addEventListener('ended', function(){
+      stop();
+      els.forEach(function(x){ try { x.currentTime = 0; } catch (e) {} });
+      setPlaying(false);
+    });
+    el.addEventListener('error', function(){
+      broken = true;
+      hint.hidden = false;
+      hint.textContent = 'No demo audio found. Drop before.wav and after.wav into the audio/ folder next to this page.';
+    });
+  });
+
+  /* ---- A/B switching ------------------------------------------------ */
+
+  function setActive(i){
+    if (i === active) return;
+    var wasPlaying = !els[active].paused;
+    active = i;
+    syncOther();
+    applyVolume();
+    thumb.classList.toggle('is-b', i === 1);
+    btns.forEach(function(b, k){ b.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+    stateEl.textContent = labels[i];
+    if (wasPlaying){
+      var p = els[i].play();
+      if (p && p.catch) p.catch(function(){});
+    }
+    update();
+  }
+
+  btns.forEach(function(b, i){ b.addEventListener('click', function(){ setActive(i); }); });
+
+  /* ---- seeking ------------------------------------------------------ */
+
+  function seekTo(clientX){
+    var d = duration();
+    if (!d) return;
+    var r = wave.getBoundingClientRect();
+    var p = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+    seekSeconds(p * d, true);
+  }
+
+  function seekSeconds(t, absolute){
+    var d = duration();
+    if (!d) return;
+    var target = Math.min(d - 0.02, Math.max(0, absolute ? t : els[active].currentTime + t));
+    els.forEach(function(el){
+      var od = isFinite(el.duration) ? el.duration : d;
+      try { el.currentTime = Math.min(target, od - 0.02); } catch (e) {}
+    });
+    update();
+  }
+
+  wave.addEventListener('pointerdown', function(e){
+    wave.setPointerCapture(e.pointerId);
+    seekTo(e.clientX);
+  });
+  wave.addEventListener('pointermove', function(e){
+    if (e.buttons & 1) seekTo(e.clientX);
+  });
+  wave.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft'){ seekSeconds(-5); e.preventDefault(); }
+    else if (e.key === 'ArrowRight'){ seekSeconds(5); e.preventDefault(); }
+    else if (e.key === ' ' || e.key === 'Enter'){
+      if (els[active].paused) start(); else stop();
+      e.preventDefault();
+    }
+  });
+
+  volIn.addEventListener('input', function(){
+    vol = parseFloat(volIn.value);
+    applyVolume();
+  });
+
+  window.addEventListener('resize', sizeCanvas);
+  applyVolume();
+  sizeCanvas();
+  update();
+  loadPeaks();
+})();
+</script>
 
 </body>
 </html>
