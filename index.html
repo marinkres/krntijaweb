@@ -158,7 +158,7 @@ footer{padding:56px 0 64px}
         <a class="btn btn-primary" href="#" download>Download for Windows<small>VST3 · 64-bit</small></a>
         <a class="btn" href="#" download>Download for macOS<small>VST3 + AU · Universal</small></a>
       </div>
-      <p class="filemeta">Updated August 2026 · ~4 MB ·</p>
+      <p class="filemeta">Updated August 2026 · Free untill September 2026 ·</p>
     </div>
 
     <div>
@@ -197,7 +197,7 @@ footer{padding:56px 0 64px}
       <h2>Before and after</h2>
     </div>
     <div>
-      <p class="lead">The same loop twice — once straight out of the DAW, once after it has been through the car. Switch while it plays: both sides stay locked to the same position, so the only thing that changes is the speaker.</p>
+      <p class="lead">See the effect:</p>
 
       <div class="ab" id="ab">
         <div class="ab-switch">
@@ -413,6 +413,7 @@ footer{padding:56px 0 64px}
 
   var PLAY = 'M8 5.5v13l11-6.5z', PAUSE = 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z';
   var active = 0, vol = parseFloat(volIn.value), raf = 0, broken = false;
+  var wantPlaying = false, dragging = false, lastResume = [0, 0];
 
   function fmt(t){
     if (!isFinite(t) || t < 0) t = 0;
@@ -489,8 +490,28 @@ footer{padding:56px 0 64px}
 
   /* ---- transport --------------------------------------------------- */
 
-  function applyVolume(){
-    els.forEach(function(el, i){ el.volume = i === active ? vol : 0; });
+  /* iOS ignores writes to .volume — the level there is under the user's physical
+     control and the property is read-only. Muting is honoured, so that is what
+     decides which side you hear; .volume only drives the slider on desktop. */
+  function applyLevels(){
+    els.forEach(function(el, i){
+      var on = i === active;
+      el.muted = !on;
+      el.volume = on ? vol : 0;
+    });
+  }
+
+  /* Re-assert on every frame: a stalled buffer or an interrupted seek on mobile
+     can hand the element back to us unmuted, and one unmuted frame is audible. */
+  function enforce(){
+    els.forEach(function(el, i){
+      var shouldMute = i !== active;
+      if (el.muted !== shouldMute) el.muted = shouldMute;
+    });
+  }
+
+  function isEnded(el){
+    return el.ended || (isFinite(el.duration) && el.duration > 0 && el.currentTime >= el.duration - 0.05);
   }
 
   function syncOther(){
@@ -514,6 +535,7 @@ footer{padding:56px 0 64px}
 
   function tick(){
     syncOther();
+    enforce();
     update();
     raf = requestAnimationFrame(tick);
   }
@@ -527,24 +549,41 @@ footer{padding:56px 0 64px}
 
   function start(){
     if (broken) return;
+    wantPlaying = true;
     syncOther();
-    applyVolume();
+    applyLevels();
     els.forEach(function(el){
       var p = el.play();
       if (p && p.catch) p.catch(function(){});
     });
   }
 
-  function stop(){ els.forEach(function(el){ el.pause(); }); }
+  function stop(){
+    wantPlaying = false;
+    els.forEach(function(el){ el.pause(); });
+  }
 
   playBtn.addEventListener('click', function(){
     if (els[active].paused) start(); else stop();
   });
 
-  els[0].addEventListener('play', function(){ setPlaying(true); });
-  els[0].addEventListener('pause', function(){ if (els[active].paused) setPlaying(false); });
-  els[1].addEventListener('play', function(){ setPlaying(true); });
-  els[1].addEventListener('pause', function(){ if (els[active].paused) setPlaying(false); });
+  els.forEach(function(el, i){
+    el.addEventListener('play', function(){ applyLevels(); setPlaying(true); });
+    el.addEventListener('pause', function(){
+      /* Mobile browsers pause one element when the other starts or when a seek
+         interrupts buffering. Put it back, or the pair drifts apart and the two
+         sides stop describing the same moment. The timestamp keeps a failing
+         play() from spinning between pause and play. */
+      var now = Date.now();
+      if (wantPlaying && !isEnded(el) && now - lastResume[i] > 300){
+        lastResume[i] = now;
+        var p = el.play();
+        if (p && p.catch) p.catch(function(){});
+        return;
+      }
+      if (els[active].paused) setPlaying(false);
+    });
+  });
 
   els.forEach(function(el){
     el.addEventListener('loadedmetadata', update);
@@ -567,7 +606,7 @@ footer{padding:56px 0 64px}
     var wasPlaying = !els[active].paused;
     active = i;
     syncOther();
-    applyVolume();
+    applyLevels();
     thumb.classList.toggle('is-b', i === 1);
     btns.forEach(function(b, k){ b.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
     stateEl.textContent = labels[i];
@@ -601,13 +640,26 @@ footer{padding:56px 0 64px}
     update();
   }
 
+  /* Touch reports e.buttons unreliably, so track the drag explicitly. Without
+     pointercancel — which fires when the browser takes the gesture over to
+     scroll the page — the drag never ends and the scroll keeps seeking. */
   wave.addEventListener('pointerdown', function(e){
-    wave.setPointerCapture(e.pointerId);
+    dragging = true;
+    try { wave.setPointerCapture(e.pointerId); } catch (err) {}
     seekTo(e.clientX);
+    e.preventDefault();
   });
   wave.addEventListener('pointermove', function(e){
-    if (e.buttons & 1) seekTo(e.clientX);
+    if (dragging) seekTo(e.clientX);
   });
+  ['pointerup', 'pointercancel'].forEach(function(type){
+    wave.addEventListener(type, function(e){
+      dragging = false;
+      try { wave.releasePointerCapture(e.pointerId); } catch (err) {}
+      applyLevels();
+    });
+  });
+  window.addEventListener('pointerup', function(){ dragging = false; });
   wave.addEventListener('keydown', function(e){
     if (e.key === 'ArrowLeft'){ seekSeconds(-5); e.preventDefault(); }
     else if (e.key === 'ArrowRight'){ seekSeconds(5); e.preventDefault(); }
@@ -619,11 +671,11 @@ footer{padding:56px 0 64px}
 
   volIn.addEventListener('input', function(){
     vol = parseFloat(volIn.value);
-    applyVolume();
+    applyLevels();
   });
 
   window.addEventListener('resize', sizeCanvas);
-  applyVolume();
+  applyLevels();
   sizeCanvas();
   update();
   loadPeaks();
