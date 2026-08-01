@@ -95,14 +95,29 @@ h2{font-family:var(--f-disp);font-weight:800;font-size:clamp(32px,4.4vw,52px);li
 .ads h2{color:#1A140F}
 .ads .eyebrow{color:#7A6A58}
 .ads-intro{max-width:58ch;color:#4A4038;margin:14px 0 40px}
-.ad{display:grid;grid-template-columns:118px minmax(0,1fr) 220px;gap:28px;padding:24px 0;border-top:1px solid rgba(26,20,15,.22);align-items:start}
-.ad:last-child{border-bottom:1px solid rgba(26,20,15,.22)}
-.ad-key{font-family:var(--f-disp);font-weight:800;font-size:27px;text-transform:uppercase;line-height:1;color:#1A140F}
-.ad-key em{display:block;font-family:var(--f-mono);font-style:normal;font-size:10.5px;font-weight:400;letter-spacing:.16em;color:#8A7A66;margin-top:8px}
-.ad-car{font-family:var(--f-disp);font-weight:700;font-size:20px;text-transform:uppercase;margin:0 0 6px;color:#2A2119}
-.ad-copy{margin:0;font-size:14.5px;line-height:1.6;color:#4A4038}
-.ad-spec{font-family:var(--f-mono);font-size:11px;line-height:1.9;letter-spacing:.05em;color:#6B5C4A;text-transform:uppercase}
-.ad-spec b{color:#1A140F;font-weight:700}
+.fleet{margin-top:38px}
+.fleet-track{display:flex;gap:20px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:2px 2px 20px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fleet-track::-webkit-scrollbar{display:none}
+.fleet-track:focus-visible{outline:2px solid #1A140F;outline-offset:4px}
+.car{scroll-snap-align:start;flex:0 0 clamp(258px,74vw,336px);display:flex;flex-direction:column;background:#F1ECE2;border:1px solid rgba(26,20,15,.2);border-radius:6px;padding:24px;box-shadow:0 1px 2px rgba(26,20,15,.08)}
+.car-key{font-family:var(--f-disp);font-weight:800;font-size:30px;line-height:1;text-transform:uppercase;color:#1A140F}
+.car-key em{display:block;font-family:var(--f-mono);font-style:normal;font-size:10.5px;font-weight:400;letter-spacing:.16em;color:#8A7A66;margin-top:8px}
+.car-name{font-family:var(--f-disp);font-weight:700;font-size:20px;text-transform:uppercase;margin:17px 0 0;padding-top:15px;border-top:1px solid rgba(26,20,15,.18);color:#2A2119}
+.car-copy{margin:10px 0 0;font-size:14.5px;line-height:1.6;color:#4A4038;flex:1}
+.car-spec{margin:18px 0 0;padding-top:13px;border-top:1px solid rgba(26,20,15,.18);font-family:var(--f-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase}
+.car-spec div{display:flex;justify-content:space-between;gap:14px;padding:3.5px 0}
+.car-spec span{color:#8A7A66}
+.car-spec b{color:#1A140F;font-weight:700;text-align:right}
+.fleet-nav{display:flex;align-items:center;gap:12px;margin-top:4px}
+.fleet-btn{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid rgba(26,20,15,.3);background:transparent;color:#1A140F;display:grid;place-items:center;cursor:pointer;transition:background .12s ease,border-color .12s ease,opacity .12s ease}
+.fleet-btn:hover:not(:disabled){background:#1A140F;border-color:#1A140F;color:var(--bone)}
+.fleet-btn:disabled{opacity:.28;cursor:default}
+.fleet-btn:focus-visible{outline:2px solid #1A140F;outline-offset:3px}
+.fleet-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fleet-dots{display:flex;gap:8px;margin-left:auto}
+.fleet-dot{width:8px;height:8px;padding:0;border:0;border-radius:50%;background:rgba(26,20,15,.25);cursor:pointer;transition:background .15s ease,transform .15s ease}
+.fleet-dot[aria-current="true"]{background:var(--needle);transform:scale(1.3)}
+.fleet-dot:focus-visible{outline:2px solid #1A140F;outline-offset:3px}
 
 .manual{padding:76px 0;border-bottom:1px solid var(--hair)}
 .manual-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:56px;margin-bottom:8px}
@@ -156,13 +171,13 @@ footer{padding:56px 0 64px}
   .hero-grid,.pitch-grid,.demo-grid{grid-template-columns:1fr;gap:36px}
   .ab-wave{height:84px}
   .hero{padding:44px 0 56px}
-  .ad{grid-template-columns:1fr;gap:12px}
+  .fleet-track{gap:14px}
   .manual-head{grid-template-columns:1fr;gap:20px}
   .ctrl{grid-template-columns:1fr;gap:10px}
 }
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
-  html{scroll-behavior:auto}
+  html,.fleet-track{scroll-behavior:auto}
 }
 </style>
 </head>
@@ -264,58 +279,78 @@ footer{padding:56px 0 64px}
     <h2>Six cars on offer</h2>
     <p class="ads-intro">Every button in the plugin is one car. Responses were captured from the driver's seat, with everything the original had including the parts that had already stopped working.</p>
 
-    <div class="ad">
-      <div class="ad-key">MERC<em>Button 01</em></div>
-      <div>
-        <p class="ad-car">190E (W201), 1985</p>
-        <p class="ad-copy">One doctor owner, garage kept, full service history. The cleanest preset in the pack. Warm mids and highs that are somehow still alive.</p>
+    <div class="fleet">
+      <div class="fleet-track" id="fleet-track" tabindex="0" role="region" aria-label="The fleet, six cars">
+      <article class="car">
+        <div class="car-key">MERC<em>Button 01</em></div>
+        <p class="car-name">190E (W201), 1985</p>
+        <p class="car-copy">One doctor owner, garage kept, full service history. The cleanest preset in the pack. Warm mids and highs that are somehow still alive.</p>
+        <div class="car-spec">
+          <div><span>Band</span><b>90 Hz – 12 kHz</b></div>
+          <div><span>Distortion</span><b>3%</b></div>
+          <div><span>Condition</span><b>well kept</b></div>
+        </div>
+      </article>
+      <article class="car">
+        <div class="car-key">GOLF 2<em>Button 02</em></div>
+        <p class="car-name">1.6 D, 1989</p>
+        <p class="car-copy">Four speakers, two working. Boxed-in mids and a low end that stops dead at 120 Hz like it hit a wall. The best test of whether your mix survives the real world.</p>
+        <div class="car-spec">
+          <div><span>Band</span><b>120 Hz – 8 kHz</b></div>
+          <div><span>Distortion</span><b>7%</b></div>
+          <div><span>Condition</span><b>still runs</b></div>
+        </div>
+      </article>
+      <article class="car">
+        <div class="car-key">YUGO<em>Button 03</em></div>
+        <p class="car-name">45, 1987</p>
+        <p class="car-copy">A cassette jammed in the deck in 1994 and stayed there. Crackly, mono, with a wobble on the top end that never quite settles. Vocals through this sound like a call from a petrol station.</p>
+        <div class="car-spec">
+          <div><span>Band</span><b>200 Hz – 5 kHz</b></div>
+          <div><span>Distortion</span><b>14%</b></div>
+          <div><span>Condition</span><b>for parts</b></div>
+        </div>
+      </article>
+      <article class="car">
+        <div class="car-key">CIVIC<em>Button 04</em></div>
+        <p class="car-name">EG hatchback, 1996</p>
+        <p class="car-copy">The sub in the boot is worth more than the car. Bass shoves everything else aside and clips the moment you push it, and the mids have left entirely. For an 808 that has to hurt.</p>
+        <div class="car-spec">
+          <div><span>Band</span><b>35 Hz – 9 kHz</b></div>
+          <div><span>Distortion</span><b>11%</b></div>
+          <div><span>Condition</span><b>modified</b></div>
+        </div>
+      </article>
+      <article class="car">
+        <div class="car-key">E36<em>Button 05</em></div>
+        <p class="car-name">318i, 1994</p>
+        <p class="car-copy">Tinted windows, tired speakers. The highs are muffled like someone threw a blanket over them, but the bottom still holds together. Good for taking the edge off a mix that's too bright.</p>
+        <div class="car-spec">
+          <div><span>Band</span><b>70 Hz – 6 kHz</b></div>
+          <div><span>Distortion</span><b>6%</b></div>
+          <div><span>Condition</span><b>road legal</b></div>
+        </div>
+      </article>
+      <article class="car">
+        <div class="car-key">FICO<em>Button 06</em></div>
+        <p class="car-name">Zastava 750, 1979</p>
+        <p class="car-copy">The narrowest band in the pack, essentially a telephone with an engine behind it. For when something has to sound like it's coming from another room, in another decade.</p>
+        <div class="car-spec">
+          <div><span>Band</span><b>400 Hz – 3.4 kHz</b></div>
+          <div><span>Distortion</span><b>18%</b></div>
+          <div><span>Condition</span><b>off the road</b></div>
+        </div>
+      </article>
       </div>
-      <div class="ad-spec">Band <b>90 Hz – 12 kHz</b><br>Distortion <b>3%</b><br>Condition <b>well kept</b></div>
-    </div>
-
-    <div class="ad">
-      <div class="ad-key">GOLF 2<em>Button 02</em></div>
-      <div>
-        <p class="ad-car">1.6 D, 1989</p>
-        <p class="ad-copy">Four speakers, two working. Boxed-in mids and a low end that stops dead at 120 Hz like it hit a wall. The best test of whether your mix survives the real world.</p>
+      <div class="fleet-nav">
+        <button type="button" class="fleet-btn" id="fleet-prev" aria-label="Previous car">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button type="button" class="fleet-btn" id="fleet-next" aria-label="Next car">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <div class="fleet-dots" id="fleet-dots"></div>
       </div>
-      <div class="ad-spec">Band <b>120 Hz – 8 kHz</b><br>Distortion <b>7%</b><br>Condition <b>still runs</b></div>
-    </div>
-
-    <div class="ad">
-      <div class="ad-key">YUGO<em>Button 03</em></div>
-      <div>
-        <p class="ad-car">45, 1987</p>
-        <p class="ad-copy">A cassette jammed in the deck in 1994 and stayed there. Crackly, mono, with a wobble on the top end that never quite settles. Vocals through this sound like a call from a petrol station.</p>
-      </div>
-      <div class="ad-spec">Band <b>200 Hz – 5 kHz</b><br>Distortion <b>14%</b><br>Condition <b>for parts</b></div>
-    </div>
-
-    <div class="ad">
-      <div class="ad-key">CIVIC<em>Button 04</em></div>
-      <div>
-        <p class="ad-car">EG hatchback, 1996</p>
-        <p class="ad-copy">The sub in the boot is worth more than the car. Bass shoves everything else aside and clips the moment you push it, and the mids have left entirely. For an 808 that has to hurt.</p>
-      </div>
-      <div class="ad-spec">Band <b>35 Hz – 9 kHz</b><br>Distortion <b>11%</b><br>Condition <b>modified</b></div>
-    </div>
-
-    <div class="ad">
-      <div class="ad-key">E36<em>Button 05</em></div>
-      <div>
-        <p class="ad-car">318i, 1994</p>
-        <p class="ad-copy">Tinted windows, tired speakers. The highs are muffled like someone threw a blanket over them, but the bottom still holds together. Good for taking the edge off a mix that's too bright.</p>
-      </div>
-      <div class="ad-spec">Band <b>70 Hz – 6 kHz</b><br>Distortion <b>6%</b><br>Condition <b>road legal</b></div>
-    </div>
-
-    <div class="ad">
-      <div class="ad-key">FICO<em>Button 06</em></div>
-      <div>
-        <p class="ad-car">Zastava 750, 1979</p>
-        <p class="ad-copy">The narrowest band in the pack, essentially a telephone with an engine behind it. For when something has to sound like it's coming from another room, in another decade.</p>
-      </div>
-      <div class="ad-spec">Band <b>400 Hz – 3.4 kHz</b><br>Distortion <b>18%</b><br>Condition <b>off the road</b></div>
     </div>
   </div>
 </section>
@@ -702,6 +737,93 @@ footer{padding:56px 0 64px}
   sizeCanvas();
   update();
   loadPeaks();
+})();
+
+(function(){
+  var track = document.getElementById('fleet-track');
+  if (!track) return;
+  var cards = Array.prototype.slice.call(track.querySelectorAll('.car'));
+  var prev = document.getElementById('fleet-prev'),
+      next = document.getElementById('fleet-next'),
+      dotWrap = document.getElementById('fleet-dots');
+  if (!cards.length || !prev || !next || !dotWrap) return;
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var dots = [];
+
+  /* Measure the real distance between two cards rather than assuming a width:
+     the card is sized with clamp() and the gap comes from flex, so both change
+     with the viewport. */
+  function step(){
+    if (cards.length < 2) return cards[0].offsetWidth || 1;
+    return (cards[1].offsetLeft - cards[0].offsetLeft) || 1;
+  }
+
+  function perView(){
+    return Math.max(1, Math.floor((track.clientWidth + 1) / step()));
+  }
+
+  /* One dot per reachable scroll position, not per car. With three cards on
+     screen the track runs out after the fourth, so a dot per car would leave
+     the last two lit but unreachable. */
+  function pages(){
+    return Math.max(1, cards.length - perView() + 1);
+  }
+
+  function index(){
+    return Math.max(0, Math.min(pages() - 1, Math.round(track.scrollLeft / step())));
+  }
+
+  function go(i){
+    i = Math.max(0, Math.min(pages() - 1, i));
+    track.scrollTo({ left: i * step(), behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  function makeDot(i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fleet-dot';
+    var key = cards[i] && cards[i].querySelector('.car-key');
+    var name = key && key.firstChild ? String(key.firstChild.nodeValue).trim() : '';
+    b.setAttribute('aria-label', 'Show ' + (name || 'car ' + (i + 1)));
+    b.addEventListener('click', function(){ go(i); });
+    dotWrap.appendChild(b);
+    return b;
+  }
+
+  /* How many fit changes with the viewport, so the dot count has to follow it. */
+  function buildDots(){
+    var n = pages();
+    if (dots.length === n) return;
+    dotWrap.innerHTML = '';
+    dots = [];
+    for (var i = 0; i < n; i++) dots.push(makeDot(i));
+  }
+
+  function sync(){
+    buildDots();
+    var i = index(), max = track.scrollWidth - track.clientWidth;
+    dots.forEach(function(d, k){ d.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+    prev.disabled = track.scrollLeft <= 1;
+    next.disabled = track.scrollLeft >= max - 1;
+  }
+
+  prev.addEventListener('click', function(){ go(index() - 1); });
+  next.addEventListener('click', function(){ go(index() + 1); });
+
+  track.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft'){ go(index() - 1); e.preventDefault(); }
+    else if (e.key === 'ArrowRight'){ go(index() + 1); e.preventDefault(); }
+  });
+
+  var t = 0;
+  track.addEventListener('scroll', function(){
+    clearTimeout(t);
+    t = setTimeout(sync, 60);
+  });
+  window.addEventListener('resize', sync);
+  sync();
 })();
 </script>
 
