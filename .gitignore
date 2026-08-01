@@ -1,0 +1,5 @@
+# Audio masters — the site ships the MP3s, the WAVs stay local.
+# See audio/README.md for the encode commands.
+audio/*.wav
+
+.DS_Store

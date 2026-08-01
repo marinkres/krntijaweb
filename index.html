@@ -229,8 +229,8 @@ footer{padding:56px 0 64px}
         <p class="ab-hint" id="ab-hint" hidden></p>
       </div>
 
-      <audio id="ab-audio-a" src="audio/before.wav" preload="auto"></audio>
-      <audio id="ab-audio-b" src="audio/after.wav" preload="auto"></audio>
+      <audio id="ab-audio-a" src="audio/before.mp3" preload="auto"></audio>
+      <audio id="ab-audio-b" src="audio/after.mp3" preload="auto"></audio>
     </div>
   </div>
 </section>
@@ -556,7 +556,7 @@ footer{padding:56px 0 64px}
     el.addEventListener('error', function(){
       broken = true;
       hint.hidden = false;
-      hint.textContent = 'No demo audio found. Drop before.wav and after.wav into the audio/ folder next to this page.';
+      hint.textContent = 'No demo audio found. Drop before.mp3 and after.mp3 into the audio/ folder next to this page.';
     });
   });
 
