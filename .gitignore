@@ -2,4 +2,7 @@
 # See audio/README.md for the encode commands.
 audio/*.wav
 
+# Source render for og-image.jpg — 2 MB, not served.
+452_1x_shots_so.png
+
 .DS_Store
